@@ -5,45 +5,49 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract Wallet is Ownable {
+contract EstateWallet is Ownable {
 
     // This contract is NOT payable using unwrapped ether
 
-    uint releaseTime; // The unix time (ms) when the beneficiary will gain access
-    uint checkInInterval; // How long (in ms) after the owner last checks in until the beneficiary gains access
+    uint public _releaseTime; // The time (seconds since unix epoch) when the beneficiary will gain access
+    uint public _checkInInterval; // How long (in ms) after the owner last checks in until the beneficiary gains access
 
-    address beneficiary; // The recipient of the funds if the owner fails to keep checking in
-    
+    address public _beneficiary; // The recipient of the funds if the owner fails to keep checking in
+
     modifier onlyAuthorizedUser() {
-         require(msg.sender == owner() || (msg.sender == beneficiary && now > releaseTime));
+         require(msg.sender == owner() || (msg.sender == _beneficiary && block.timestamp >= _releaseTime));
          _;
     }
 
-    constructor(address _beneficiary, uint _checkInInterval) internal {
-        beneficiary = _beneficiary;
-        checkInInterval = _checkInInterval;
-        releaseTime = now + _checkInInterval;
+    constructor() public {
+        // We do not set _beneficiary here. It's null (nobody) until set.
+        _checkInInterval = 365 days; // Set check-in interval to 365 days by default
+        _releaseTime = block.timestamp + _checkInInterval; // Set release time to be in the future
     }
 
-    function setCheckInInterval(uint _checkInInterval) onlyOwner public {
+    function setBeneficiary(address newBeneficiary) public onlyOwner {
+        _beneficiary = newBeneficiary;
+    }
+
+    function setCheckInInterval(uint newCheckInInterval) public onlyOwner {
+        _checkInInterval = newCheckInInterval;
         checkIn(); // Automatically check in
-        checkInInterval = _checkInInterval;
     }
 
     // Make sure to check in well before the release time, or the beneficiary will gain control!
-    function checkIn() onlyOwner public {
-        releaseTime = now + checkInInterval;
+    function checkIn() public onlyOwner {
+        _releaseTime = block.timestamp + _checkInInterval;
     }
 
-    function transferERC20(address tokenContractAddress, address recipient, uint256 amount) onlyAuthorizedUser public {
+    function transferERC20(address tokenContractAddress, address recipient, uint256 amount) public onlyAuthorizedUser {
         IERC20 tokenContract = IERC20(tokenContractAddress);
         tokenContract.transfer(recipient, amount);
     }
 
-    function transferERC721(address tokenContractAddress, address recipient, uint256 amount) onlyAuthorizedUser public {
+    function transferERC721(address tokenContractAddress, address recipient, uint256 amount) public onlyAuthorizedUser {
         IERC721 tokenContract = IERC721(tokenContractAddress);
         tokenContract.safeTransferFrom(address(this), recipient, amount);
     }
 
-    // This contract should not be destroyable, it would only allow for user error
+    // This contract should not be destroyable, it would allow a user to strand tokens too easily
 }
