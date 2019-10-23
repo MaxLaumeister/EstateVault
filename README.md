@@ -21,6 +21,12 @@ Alice owns ERC-20 and ERC-721 tokens that she would like to pass on to Bob if so
 
 **TODO:** Write a short *Getting Started* guide.
 
+## Future Plans
+
+Ideally, each *Ethereum Estate Wallet* instance should itself be an ERC-721 token. This would allow wallet ownership to show up on block explorers, and allow ownership to be transferred via standard Ethereum wallet functionality.
+
+Then, beneficiary access could be simplified to calling a function that yanks ownership from the owner (when allowed to do so).
+
 ## Disclaimer
 
 This project is purely academic, incomplete, not properly tested, and not intended to secure real cryptocurrency of value on any "mainnet". I take no responsibility for any lost funds as a result of using code found in this repository. Please read the MIT License disclaimer in the `LICENSE` file for more details.
