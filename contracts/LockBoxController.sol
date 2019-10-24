@@ -11,7 +11,7 @@ contract LockBoxController is ERC721 {
     using SafeMath for uint256;
     
     struct LockBox {
-        address childContractAddress;
+        address payable childContractAddress;
         uint checkInInterval;
         uint lastCheckIn;
         address beneficiary;
@@ -63,7 +63,13 @@ contract LockBoxController is ERC721 {
     function transferERC721(uint256 lockboxId, address tokenContractAddress, address recipient, uint256 tokenId) public {
         require(_isOwner(lockboxId));
         LockBoxChildContract childContract = LockBoxChildContract(lockboxes[lockboxId].childContractAddress);
-        childContract.transferERC721(tokenContractAddress, recipient, tokenId);
+        childContract.transferERC721(tokenContractAddress, recipient, tokenId); // This potentially passes control to an external contract
+    }
+
+    function transferETH(uint256 lockboxId, address payable recipient, uint256 amount) public {
+        require(_isOwner(lockboxId));
+        LockBoxChildContract childContract = LockBoxChildContract(lockboxes[lockboxId].childContractAddress);
+        childContract.transferETH(recipient, amount); // This potentially passes control to an external contract
     }
 
     function _isAuthorizedBeneficiary(uint256 lockboxId) private view returns (bool) {
