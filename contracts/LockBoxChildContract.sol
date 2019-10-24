@@ -12,6 +12,8 @@ contract LockBoxChildContract  {
          _;
     }
 
+    function () external payable {} // This contract acts like a wallet, holding ETH, ERC-20 and ERC-721
+
     constructor (address parentContract) public {
         _parentContract = parentContract;
     }
@@ -23,6 +25,10 @@ contract LockBoxChildContract  {
 
     function transferERC721(address tokenContractAddress, address recipient, uint256 tokenId) public onlyParentContract {
         IERC721 tokenContract = IERC721(tokenContractAddress);
-        tokenContract.safeTransferFrom(address(this), recipient, tokenId);
+        tokenContract.safeTransferFrom(address(this), recipient, tokenId); // This potentially passes control to an external contract
+    }
+
+    function transferETH(address payable recipient, uint256 amount) public onlyParentContract {
+        recipient.transfer(amount); // This potentially passes control to an external contract
     }
 }

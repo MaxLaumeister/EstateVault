@@ -4,15 +4,6 @@ const truffleAssert = require('truffle-assertions');
 
 const NUM_CONTRACTS = 3; // Do not edit - address 4 and greater are used for additional tests
 
-function areEqual(){
-    var len = arguments.length;
-    for (var i = 1; i< len; i++){
-       if (arguments[i] === null || arguments[i] !== arguments[i-1])
-          return false;
-    }
-    return true;
-}
-
 contract("LockBoxController", async function(accounts) {
 
     let lockBoxControllerInstance;
@@ -65,9 +56,11 @@ contract("LockBoxController", async function(accounts) {
 
     describe("deposits", async function() {
 
-        //it("anyone can send ETH to a lockbox contract", async function() {
-            
-        //});
+        it("anyone can send ETH to a lockbox contract", async function() {
+            await childContracts[0].send(10); // Send 10 wei
+            console.log(childContracts[0].address, await web3.eth.getBalance(childContracts[0].address));
+            assert(await web3.eth.getBalance(childContracts[0].address) == 10);
+        });
     
         //it("anyone can send ERC-20 tokens to a lockbox contract", async function() {
             
