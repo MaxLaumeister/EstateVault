@@ -3,9 +3,9 @@ pragma solidity >=0.4.21 <0.6.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract LockBoxWallet  {
+contract LockBoxChildContract  {
 
-    address _parentContract;
+    address public _parentContract;
 
     modifier onlyParentContract() {
          require(msg.sender == _parentContract);
