@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "./LockBoxWallet.sol";
+import "./LockBoxChildContract.sol";
 
 contract LockBoxController is ERC721 {
 
@@ -17,47 +17,45 @@ contract LockBoxController is ERC721 {
         address beneficiary;
     }
 
-    uint256 _tokenCount;
-
-    LockBox[] lockBoxes;
+    LockBox[] public lockBoxes;
 
     constructor() public {
         // Global setup
     }
 
-    function newLockBox() public returns (uint256) {
+    function newLockBox() public {
         // Create instance of the child contract, with this contract as the parent
-        LockBoxWallet childContract = new LockBoxWallet(address(this));
-        uint256 lockboxId = _tokenCount;
+        LockBoxChildContract childContract = new LockBoxChildContract(address(this));
+        uint256 lockboxId = lockBoxes.length;
         _mint(msg.sender, lockboxId); // Create a new ERC-721 token with sequential ID
-        _tokenCount = _tokenCount.add(1); // If successful, increment the token count.
-        lockBoxes[lockboxId] = LockBox(address(childContract), 365 days, block.timestamp + 365 days, address(0));
-        lockBoxes[lockboxId];
-        return lockboxId;
+        lockBoxes.push(LockBox(address(childContract), 365 days, block.timestamp + 365 days, address(0)));
     }
 
-    // Transfer a lockbox to a new owner
-    function transferFrom(address from, address to, uint256 lockboxId) public {
-        require(_isAuthorized(lockboxId));
+    // As beneficiary, transfer ownership to an address of your choice
+    function claimAsBeneficiary(address from, address to, uint256 lockboxId) public {
+        require(_isAuthorizedBeneficiary(lockboxId));
         _transferFrom(from, to, lockboxId);
     }
 
     function transferERC20(uint256 lockboxId, address tokenContractAddress, address recipient, uint256 amount) public {
-        require(_isAuthorized(lockboxId));
-        LockBoxWallet childContract = LockBoxWallet(lockBoxes[lockboxId].childContractAddress);
+        require(_isOwner(lockboxId));
+        LockBoxChildContract childContract = LockBoxChildContract(lockBoxes[lockboxId].childContractAddress);
         childContract.transferERC20(tokenContractAddress, recipient, amount);
     }
 
     function transferERC721(uint256 lockboxId, address tokenContractAddress, address recipient, uint256 tokenId) public {
-        require(_isAuthorized(lockboxId));
-        LockBoxWallet childContract = LockBoxWallet(lockBoxes[lockboxId].childContractAddress);
+        require(_isOwner(lockboxId));
+        LockBoxChildContract childContract = LockBoxChildContract(lockBoxes[lockboxId].childContractAddress);
         childContract.transferERC721(tokenContractAddress, recipient, tokenId);
     }
 
-    function _isAuthorized(uint256 lockboxId) private view returns (bool) {
-        // Only the owner, or if the timelock is up, the beneficiary.
+    function _isAuthorizedBeneficiary(uint256 lockboxId) private view returns (bool) {
+        // Beneficiary is only allowed if the timelock is up
         LockBox memory lockbox = lockBoxes[lockboxId];
-        return _isApprovedOrOwner(msg.sender, lockboxId) ||
-            (msg.sender == lockbox.beneficiary && block.timestamp >= lockbox.releaseTime);
+        return msg.sender == lockbox.beneficiary && block.timestamp >= lockbox.releaseTime;
+    }
+
+    function _isOwner(uint256 lockboxId) private view returns (bool) {
+        return msg.sender == ownerOf(lockboxId);
     }
 }
