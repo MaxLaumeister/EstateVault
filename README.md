@@ -1,17 +1,18 @@
-# Ethereum Estate Wallet
+# Ethereum Estate Vaults
 
-**Ethereum Estate Wallet** is a dead-man's-switch Ethereum wallet for ERC-20 and ERC-721 tokens, written using the Truffle and OpenZeppelin frameworks. It allows you to bequeath Wrapped Ether, DAI, God's Unchained Cards, Cryptokitties, ENS Names, and other tokens to a beneficiary after you are no longer capable of checking in regularly with the *Ethereum Estate Wallet* smart contract.
+**Ethereum Estate Vaults** is a dead-man's-switch Ethereum wallet for Ether, ERC-20 and ERC-721 tokens, written using the Truffle and OpenZeppelin frameworks. It allows you to bequeath Wrapped Ether, DAI, God's Unchained Cards, Cryptokitties, ENS Names, and other tokens to a beneficiary after you are no longer capable of checking in regularly with the central smart contract.
 
-This contract's aim is to be as barebones, straightforward, and auditable as possible.
+Each vault is itself an ERC-721 token, so you can view it on block explorers, and transfer ownership of the vault and all tokens inside by using the standard "send" function of your wallet!
 
 ## Example
 
-Alice owns ERC-20 and ERC-721 tokens that she would like to pass on to Bob if something were to happen to her. She takes the following steps:
+Alice owns ETH, ERC-20, and ERC-721 tokens that she would like to pass on to Bob if something were to happen to her. She takes the following steps:
 
-1. Alice instantiates the *Ethereum Estate Wallet* smart contract, and leaves the `checkInInterval` at its default value of `365 days`. She sends her ERC-20 and ERC-721 tokens to it. She is allowed to withdraw them at any time.
-2. Every 6 months, Alice calls the `checkIn()` function to reset the endowment date to `365 days` in the future.
-3. Due to reasons outside her control, Alice is unable to check in. After it has been `365 days` since her last check-in, the endowment date is reached, and Bob is able to withdraw ERC-20 and ERC-721 tokens.
-4. If Alice is able to check in again after the endowment date, she can reset the endowment date to the future again, and regain control of any tokens that Bob has not yet withdrawn from the contract.
+1. Alice calls `newVault()` on the central *Ethereum Estate Vaults* smart contract. This creates a child "vault contract" under her ownership, and gives her a `vault id`. She sends her ERC-20 and ERC-721 tokens to this new vault contract. She is allowed to withdraw them at any time.
+2. Alice calls `setBeneficiary(<vault id>, <Bob's address>)` to set Bob as the beneficiary.
+3. Alice sends Eth, ERC-20 tokens, and ERC-721 tokens to her vault contract. There are no special deposit functions, so anyone can send any asset into the vault normally.
+4. Every 6 months, Alice calls the `checkIn()` function, which resets the endowment date to `365 days` in the future.
+5. Due to reasons outside her control, Alice is unable to check in. After it has been `365 days` since her last check-in (or a custom number of days that Alice had set using `setCheckInInterval()`), the endowment date is reached, and Bob is able to claim ownership of the vault and withdraw the assets.
 
 ## Dependencies
 
@@ -19,14 +20,8 @@ Alice owns ERC-20 and ERC-721 tokens that she would like to pass on to Bob if so
 * Truffle-Assertions
 * OpenZeppelin
 
-**TODO:** Write a short *Getting Started* guide.
-
-## Future Plans
-
-Ideally, each *Ethereum Estate Wallet* instance should itself be an ERC-721 token. This would allow wallet ownership to show up on block explorers, and allow ownership to be transferred via standard Ethereum wallet functionality.
-
-Then, beneficiary access could be simplified to calling a function that yanks ownership from the owner (when allowed to do so).
+**TODO:** Write short *Getting Started: As A User* and *Getting Started: As A Developer* guides.
 
 ## Disclaimer
 
-This project is purely academic, incomplete, not properly tested, and not intended to secure real cryptocurrency of value on any "mainnet". I take no responsibility for any lost funds as a result of using code found in this repository. Please read the MIT License disclaimer in the `LICENSE` file for more details.
+This project is purely academic, incomplete, not properly tested, and not intended to secure real cryptocurrency of value on any "mainnet". I take no responsibility for any lost funds as a result of using any code found in this repository. Please read the MIT License disclaimer in the `LICENSE` file for more details.

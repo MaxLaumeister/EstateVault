@@ -41,11 +41,14 @@ contract LockBoxController is ERC721 {
     function setBeneficiary(uint256 lockboxId, address beneficiary) public {
         require(_isOwner(lockboxId), "only owner can set beneficiary");
         lockboxes[lockboxId].beneficiary = beneficiary;
+        // Important: Check in (which resets endowment date) when setting beneficiary. This keeps the beneficiary from having immediate access.
+        lockboxes[lockboxId].lastCheckIn = block.timestamp;
     }
 
     function setCheckInInterval(uint256 lockboxId, uint newCheckInInterval) public {
         require(_isOwner(lockboxId), "only owner can set check in interval");
         lockboxes[lockboxId].checkInInterval = newCheckInInterval;
+        // Automatically check in
         lockboxes[lockboxId].lastCheckIn = block.timestamp;
     }
 
