@@ -33,41 +33,41 @@ contract LockBoxController is ERC721 {
 
     // As beneficiary, transfer ownership to an address of your choice. Zeroes out the beneficiary.
     function claimOwnershipAsBeneficiary(uint256 lockboxId, address from, address to) public {
-        require(_isAuthorizedBeneficiary(lockboxId));
+        require(_isAuthorizedBeneficiary(lockboxId), "either the release time is in the future, or the sending account is not a beneficiary");
         _transferFrom(from, to, lockboxId);
         lockboxes[lockboxId].beneficiary = address(0); // Zero out beneficiary
     }
 
     function setBeneficiary(uint256 lockboxId, address beneficiary) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can set beneficiary");
         lockboxes[lockboxId].beneficiary = beneficiary;
     }
 
     function setCheckInInterval(uint256 lockboxId, uint newCheckInInterval) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can set check in interval");
         lockboxes[lockboxId].checkInInterval = newCheckInInterval;
         lockboxes[lockboxId].lastCheckIn = block.timestamp;
     }
 
     function checkIn(uint256 lockboxId) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can check in");
         lockboxes[lockboxId].lastCheckIn = block.timestamp;
     }
 
     function transferERC20(uint256 lockboxId, address tokenContractAddress, address recipient, uint256 amount) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can transfer ERC20");
         LockBoxChildContract childContract = LockBoxChildContract(lockboxes[lockboxId].childContractAddress);
         childContract.transferERC20(tokenContractAddress, recipient, amount);
     }
 
     function transferERC721(uint256 lockboxId, address tokenContractAddress, address recipient, uint256 tokenId) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can transfer ERC721");
         LockBoxChildContract childContract = LockBoxChildContract(lockboxes[lockboxId].childContractAddress);
         childContract.transferERC721(tokenContractAddress, recipient, tokenId); // This potentially passes control to an external contract
     }
 
     function transferETH(uint256 lockboxId, address payable recipient, uint256 amount) public {
-        require(_isOwner(lockboxId));
+        require(_isOwner(lockboxId), "only owner can transfer ETH");
         LockBoxChildContract childContract = LockBoxChildContract(lockboxes[lockboxId].childContractAddress);
         childContract.transferETH(recipient, amount); // This potentially passes control to an external contract
     }
