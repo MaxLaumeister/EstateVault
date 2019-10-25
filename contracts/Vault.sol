@@ -4,19 +4,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
 
-contract LockBoxChildContract is ERC721Holder  {
+contract Vault is ERC721Holder  {
 
     address public _parentContract;
+    uint256 public _vaultId;
 
     modifier onlyParentContract() {
-         require(msg.sender == _parentContract, "only parent contract can make calls to child contract");
+         require(msg.sender == _parentContract, "transfer functions can only be called from the main VaultManager contract");
          _;
     }
 
     function () external payable {} // This contract acts like a wallet, holding ETH, ERC-20 and ERC-721
 
-    constructor (address parentContract) public {
+    constructor (address parentContract, uint256 vaultId) public {
         _parentContract = parentContract;
+        _vaultId = vaultId;
     }
 
     function transferERC20(address tokenContractAddress, address recipient, uint256 amount) public onlyParentContract {
