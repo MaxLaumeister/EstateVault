@@ -75,7 +75,7 @@ contract LockBoxController is ERC721 {
     function _isAuthorizedBeneficiary(uint256 lockboxId) private view returns (bool) {
         // Beneficiary is only allowed if the timelock is up
         LockBox memory lockbox = lockboxes[lockboxId];
-        return msg.sender == lockbox.beneficiary && block.timestamp >= lockbox.lastCheckIn + lockbox.checkInInterval; // No need for safemath, because these variables were set sanely by the owner
+        return msg.sender == lockbox.beneficiary && block.timestamp >= lockbox.lastCheckIn + lockbox.checkInInterval; // safemath should be used, but not a critical issue because these variables were set by the owner
     }
 
     function _isOwner(uint256 lockboxId) private view returns (bool) {
