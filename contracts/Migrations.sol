@@ -1,5 +1,8 @@
 pragma solidity >=0.4.21 <0.6.0;
 
+import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721Mintable.sol";
+
 contract Migrations {
   address public owner;
   uint public last_completed_migration;
