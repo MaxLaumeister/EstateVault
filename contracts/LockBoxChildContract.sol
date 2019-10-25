@@ -2,13 +2,14 @@ pragma solidity >=0.4.21 <0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
 
-contract LockBoxChildContract  {
+contract LockBoxChildContract is ERC721Holder  {
 
     address public _parentContract;
 
     modifier onlyParentContract() {
-         require(msg.sender == _parentContract);
+         require(msg.sender == _parentContract, "only parent contract can make calls to child contract");
          _;
     }
 
@@ -31,4 +32,5 @@ contract LockBoxChildContract  {
     function transferETH(address payable recipient, uint256 amount) public onlyParentContract {
         recipient.transfer(amount); // This potentially passes control to an external contract
     }
+
 }
