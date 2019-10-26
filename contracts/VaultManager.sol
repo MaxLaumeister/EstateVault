@@ -1,4 +1,4 @@
-pragma solidity >=0.4.21 <0.6.0;
+pragma solidity 0.5.12;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -81,6 +81,7 @@ contract VaultManager is ERC721 {
 
     function _isAuthorizedBeneficiary(uint256 vaultId) private view returns (bool) {
         // Beneficiary is only allowed if the timelock is up
+        require(vaultId < vaults.length);
         VaultInfo memory vault = vaults[vaultId];
         return msg.sender == vault.beneficiary && block.timestamp >= vault.lastCheckIn + vault.checkInInterval; // safemath should be used, but not a critical issue because these variables were set by the owner
     }
