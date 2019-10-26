@@ -18,6 +18,7 @@ Alice owns ETH, ERC-20, and ERC-721 tokens that she would like to pass on to Bob
 
 * Truffle
 * Truffle-Assertions
+* Mythx plugin for Truffle
 * OpenZeppelin
 
 ## TODO
