@@ -20,7 +20,12 @@ Alice owns ETH, ERC-20, and ERC-721 tokens that she would like to pass on to Bob
 * Truffle-Assertions
 * OpenZeppelin
 
-**TODO:** Write short *Getting Started: As A User* and *Getting Started: As A Developer* guides.
+## TODO
+
+* Emit events
+* Tokenize beneficiaryship as its own ERC-721 token (called something like a "beneficiary claim ticket"). We must tokenize ALL the things.
+* Implement `IERC721Metadata` to give the user more info about the vault/ticket tokens.
+* Write short *Getting Started: As A User* and *Getting Started: As A Developer* guides.
 
 ## Disclaimer
 
