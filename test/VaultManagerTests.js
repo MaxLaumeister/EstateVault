@@ -1,5 +1,7 @@
 const VaultManager = artifacts.require("VaultManager");
 const Vault = artifacts.require("Vault");
+const VaultKey = artifacts.require("VaultKey");
+const VaultBeneficiaryClaimTicket = artifacts.require("VaultBeneficiaryClaimTicket");
 const ERC20Mintable = artifacts.require("ERC20Mintable");
 const ERC721Mintable = artifacts.require("ERC721Mintable");
 const truffleAssert = require('truffle-assertions');
@@ -24,6 +26,9 @@ contract("ERC721Mintable", async function(accounts) {
 contract("VaultManager", async function(accounts) {
 
     let vaultManagerInstance;
+    let vaultKeyInstance;
+    let vaultBeneficiaryClaimTicketInstance;
+
     let childContracts = [];
 
     /*describe("setup", async function() {
@@ -36,6 +41,8 @@ contract("VaultManager", async function(accounts) {
 
         it("is deployed", async function() {
             vaultManagerInstance = await VaultManager.deployed();
+            vaultKeyInstance = await VaultKey.at(await vaultManagerInstance.vaultKeyTokenContract());
+            vaultBeneficiaryClaimTicketInstance = await VaultBeneficiaryClaimTicket.at(await vaultManagerInstance.vaultBeneficiaryTicketTokenContract());
         });
 
         it("can create " + NUM_CONTRACTS + " properly-owned vaults with sequential IDs", async function() {
@@ -48,16 +55,16 @@ contract("VaultManager", async function(accounts) {
 
         it("has " + NUM_CONTRACTS + " new child contracts that point back to it", async function() {
             for (let i = 0; i < NUM_CONTRACTS; i++) {
-                let childaddress = (await vaultManagerInstance.vaults(i)).childContractAddress;
-                let childcontract = await Vault.at(childaddress);
+                let childcontract = (await vaultManagerInstance.vaults(i)).vaultContract;
                 childContracts.push(childcontract);
-                // console.log((await childcontract._parentContract()), vaultManagerInstance.address);
-                assert.equal((await childcontract._parentContract()), vaultManagerInstance.address);
+                // console.log((await Vault.at(childcontract)), vaultManagerInstance.address);
+                assert.equal(await (await Vault.at(childcontract))._parentContract(), vaultManagerInstance.address);
             }
         });
 
-        it("beneficiary starts as zero address", async function() {
-            assert.equal((await vaultManagerInstance.vaults(0)).beneficiary, 0);
+        it("beneficiary starts as the vault itself", async function() {
+            
+            assert.equal(await vaultBeneficiaryClaimTicketInstance.ownerOf(0), (await vaultManagerInstance.vaults(0)).vaultContract);
         });
 
     });

@@ -10,15 +10,15 @@ import "./VaultBeneficiaryClaimTicket.sol";
 contract VaultManager {
     
     struct VaultInfo {
-        address vaultContractAddress;
+        Vault vaultContract;
         uint checkInInterval;
         uint lastCheckIn;
     }
 
     VaultInfo[] public vaults;
 
-    VaultKey vaultKeyTokenContract;
-    VaultBeneficiaryClaimTicket vaultBeneficiaryTicketTokenContract;
+    VaultKey public vaultKeyTokenContract;
+    VaultBeneficiaryClaimTicket public vaultBeneficiaryTicketTokenContract;
 
     constructor() public {
         // Global setup
@@ -31,8 +31,8 @@ contract VaultManager {
         // Create instance of the child contract, with this contract as the parent
         Vault userVaultContract = new Vault(this, vaultId);
         vaultKeyTokenContract.mint(msg.sender, vaultId); // Create a key and send it to the user
-        vaultKeyTokenContract.mint(address(userVaultContract), vaultId); // Create a beneficiary ticket and leave it inside the user's vault
-        vaults.push(VaultInfo(address(userVaultContract), 365 days, block.timestamp + 365 days)); // Save info about the vault
+        vaultBeneficiaryTicketTokenContract.mint(address(userVaultContract), vaultId); // Create a beneficiary ticket and leave it inside the user's vault
+        vaults.push(VaultInfo(userVaultContract, 365 days, block.timestamp + 365 days)); // Save info about the vault
     }
 
     // If you have the beneficiary ticket, when it's time, use your ticket to yank the vault key away from its current owner. Upon use, your beneficiary ticket will be locked in the vault.
@@ -41,7 +41,7 @@ contract VaultManager {
         vaultKeyTokenContract.yank(vaultKeyTokenContract.ownerOf(vaultId), msg.sender, vaultId); // Transfer the key from its current owner to msg.sender, the beneficiary.
         require(vaultId < vaults.length);
         VaultInfo memory vault = vaults[vaultId];
-        vaultBeneficiaryTicketTokenContract.safeTransferFrom(msg.sender, vault.vaultContractAddress, vaultId); // Transfer the benificiary claim ticket into the vault
+        vaultBeneficiaryTicketTokenContract.safeTransferFrom(msg.sender, address(vault.vaultContract), vaultId); // Transfer the benificiary claim ticket into the vault
     }
 
     function setCheckInInterval(uint256 vaultId, uint newCheckInInterval) public {
@@ -63,8 +63,14 @@ contract VaultManager {
         return vaultBeneficiaryTicketTokenContract.ownerOf(vaultId) == msg.sender && block.timestamp >= vault.lastCheckIn + vault.checkInInterval; // safemath should be used, but not a critical issue because these variables were set by the owner
     }
 
+    // TODO: Remove these functions, they should be called through VaultKey
+
     function isOwner(uint256 vaultId) public view returns (bool) {
         return msg.sender == vaultKeyTokenContract.ownerOf(vaultId);
+    }
+
+    function ownerOf(uint256 vaultId) public view returns (address) {
+        return vaultKeyTokenContract.ownerOf(vaultId);
     }
 
     // TODO: Emit events
