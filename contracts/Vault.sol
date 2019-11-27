@@ -7,7 +7,7 @@ import "./VaultManager.sol";
 
 contract Vault is ERC721Holder  {
 
-    VaultManager _parentContract;
+    VaultManager public _parentContract;
     uint256 public _vaultId;
 
     modifier onlyParentContract() {
