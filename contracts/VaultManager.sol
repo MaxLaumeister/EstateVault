@@ -36,7 +36,7 @@ contract VaultManager {
     }
 
     // If you have the beneficiary ticket, when it's time, use your ticket to yank the vault key away from its current owner. Upon use, your beneficiary ticket will be locked in the vault.
-    function yankVaultKeyAsBeneficiary(uint256 vaultId) public {
+    function claimVaultKeyAsBeneficiary(uint256 vaultId) public {
         require(_isAuthorizedBeneficiary(vaultId), "either the release time is in the future, or the sending account is not the beneficiary");
         vaultKeyTokenContract.yank(vaultKeyTokenContract.ownerOf(vaultId), msg.sender, vaultId); // Transfer the key from its current owner to msg.sender, the beneficiary.
         require(vaultId < vaults.length);

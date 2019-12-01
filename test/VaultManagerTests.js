@@ -71,73 +71,76 @@ contract("VaultManager", async function(accounts) {
 
     describe("ownership", async function() {
     
-        it("owner can transfer ownership of lockbox", async function() {
-            await vaultManagerInstance.safeTransferFrom(accounts[0], accounts[3], 0 /* ERC721 token id */, { from: accounts[0] });
-            assert.equal(await vaultManagerInstance.ownerOf(0), accounts[3]);
+        it("owner can transfer ownership of vault", async function() {
+            await vaultKeyInstance.safeTransferFrom(accounts[0], accounts[3], 0 /* ERC721 token id */, { from: accounts[0] });
+            assert.equal(await vaultKeyInstance.ownerOf(0), accounts[3]);
         });
 
-        it("stranger cannot transfer ownership of lockbox", async function() {
-            await truffleAssert.reverts(vaultManagerInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[0] }));
-            await truffleAssert.reverts(vaultManagerInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[2] }));
-            await truffleAssert.reverts(vaultManagerInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[4] }));
+        it("stranger cannot transfer ownership of vault", async function() {
+            await truffleAssert.reverts(vaultKeyInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[0] }));
+            await truffleAssert.reverts(vaultKeyInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[2] }));
+            await truffleAssert.reverts(vaultKeyInstance.safeTransferFrom(accounts[3], accounts[4], 0 /* ERC721 token id */, { from: accounts[4] }));
         });
 
     });
+        
+    let vaultzero;
 
     describe("deposits", async function() {
 
-        it("anyone can send ETH to a lockbox contract", async function() {
-            await childContracts[0].send(10); // Send 10 wei to lockbox
-            assert.equal(await web3.eth.getBalance(childContracts[0].address), 10);
+        it("anyone can send ETH to a vault contract", async function() {
+            vaultzero = await Vault.at((await vaultManagerInstance.vaults(0)).vaultContract);
+            await vaultzero.send(10); // Send 10 wei to vault
+            assert.equal(await web3.eth.getBalance(vaultzero.address), 10);
         });
     
-        it("anyone can send ERC-20 tokens to a lockbox contract", async function() {
+        it("anyone can send ERC-20 tokens to a vault contract", async function() {
             await erc20MintableInstance.mint(accounts[0], 100); // Mint some ERC-20
             assert.equal(await erc20MintableInstance.balanceOf(accounts[0]), 100);
-            await erc20MintableInstance.transfer(childContracts[0].address, 10); // Send it to the lockbox
-            assert.equal(await erc20MintableInstance.balanceOf(childContracts[0].address), 10);
+            await erc20MintableInstance.transfer(vaultzero.address, 10); // Send it to the vault
+            assert.equal(await erc20MintableInstance.balanceOf(vaultzero.address), 10);
         });
     
-        it("anyone can send ERC-721 tokens to a lockbox contract", async function() {
+        it("anyone can send ERC-721 tokens to a vault contract", async function() {
             await erc721MintableInstance.mint(accounts[0], 0); // Mint an ERC-721 with id 0
             assert.equal(await erc721MintableInstance.ownerOf(0), accounts[0]);
-            await erc721MintableInstance.safeTransferFrom(accounts[0], childContracts[0].address, 0); // Send it to the lockbox
-            assert.equal(await erc721MintableInstance.ownerOf(0), childContracts[0].address);
+            await erc721MintableInstance.safeTransferFrom(accounts[0], vaultzero.address, 0); // Send it to the vault
+            assert.equal(await erc721MintableInstance.ownerOf(0), vaultzero.address);
         });
 
     });
 
     describe("withdrawals", async function() {
 
-        it("stranger cannot transfer ETH from unowned lockbox contract", async function() {
-            await truffleAssert.reverts(vaultManagerInstance.transferETH(0, accounts[5], 10)); // Send 10 wei from lockbox
+        it("stranger cannot transfer ETH from unowned vault contract", async function() {
+            await truffleAssert.reverts(vaultzero.transferETH(accounts[5], 10)); // Send 10 wei from vault
         });
 
-        it("stranger cannot transfer ERC-20 tokens from unowned lockbox contract", async function() {
-            await truffleAssert.reverts(vaultManagerInstance.transferERC20(0, erc20MintableInstance.address, accounts[5], 1)); // Send 1 ERC-20 token from lockbox
+        it("stranger cannot transfer ERC-20 tokens from unowned vault contract", async function() {
+            await truffleAssert.reverts(vaultzero.transferERC20(erc20MintableInstance.address, accounts[5], 1)); // Send 1 ERC-20 token from vault
         });
 
-        it("stranger cannot transfer ERC-721 tokens from unowned lockbox contract", async function() {
-            await truffleAssert.reverts(vaultManagerInstance.transferERC721(0, erc721MintableInstance.address, accounts[5], 0)); // Send 1 ERC-721 token from lockbox
+        it("stranger cannot transfer ERC-721 tokens from unowned vault contract", async function() {
+            await truffleAssert.reverts(vaultzero.transferERC721(erc721MintableInstance.address, accounts[5], 0)); // Send 1 ERC-721 token from vault
         });
 
-        it("owner can transfer ETH from owned lockbox contract", async function() {
+        it("owner can transfer ETH from owned vault contract", async function() {
             let balanceBefore = await web3.eth.getBalance(accounts[5]);
             let balanceBeforeBN = web3.utils.toBN(balanceBefore);
-            await vaultManagerInstance.transferETH(0, accounts[5], 10, { from: accounts[3] }); // Send 10 wei from lockbox
+            await vaultManagerInstance.transferETH(0, accounts[5], 10, { from: accounts[3] }); // Send 10 wei from vault
             let balanceNew = await web3.eth.getBalance(accounts[5]);
             let balanceNewBN = web3.utils.toBN(balanceNew);
             assert.equal(balanceNewBN.sub(balanceBeforeBN), 10); // We should be 10 wei richer
         });
 
-        it("owner can transfer ERC-20 tokens from owned lockbox contract", async function() {
+        it("owner can transfer ERC-20 tokens from owned vault contract", async function() {
             let balanceBefore = await erc20MintableInstance.balanceOf(accounts[5]);
             await vaultManagerInstance.transferERC20(0, erc20MintableInstance.address, accounts[5], 1, { from: accounts[3] }); // Send 1 ERC-20 token from acct 3 to acct 5
             let balanceNew = await erc20MintableInstance.balanceOf(accounts[5]);
             assert.equal(balanceNew - balanceBefore, 1); // We should be 1 ERC-20 richer
         });
 
-        it("owner can transfer ERC-721 tokens from owned lockbox contract", async function() {
+        it("owner can transfer ERC-721 tokens from owned vault contract", async function() {
             let oldOwner = await erc721MintableInstance.ownerOf(0);
             assert.equal(oldOwner, childContracts[0].address); // Old owner was the child contract
             await vaultManagerInstance.transferERC721(0, erc721MintableInstance.address, accounts[5], 0, { from: accounts[3] }); // Send 1 ERC-721 token from acct 3 to acct 5
