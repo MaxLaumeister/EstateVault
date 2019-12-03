@@ -29,7 +29,7 @@ contract VaultManager {
     function newVault() public {
         uint256 vaultId = vaults.length;
         // Create instance of the child contract, with this contract as the parent
-        Vault userVaultContract = new Vault(this, vaultId);
+        Vault userVaultContract = new Vault(vaultKeyTokenContract, vaultId);
         vaultKeyTokenContract.mint(msg.sender, vaultId); // Create a key and send it to the user
         vaultBeneficiaryTicketTokenContract.mint(address(userVaultContract), vaultId); // Create a beneficiary ticket and leave it inside the user's vault
         vaults.push(VaultInfo(userVaultContract, 365 days, block.timestamp + 365 days)); // Save info about the vault
@@ -45,14 +45,14 @@ contract VaultManager {
     }
 
     function setCheckInInterval(uint256 vaultId, uint newCheckInInterval) public {
-        require(isOwner(vaultId), "only owner can set check in interval");
+        require(vaultKeyTokenContract.ownerOf(vaultId) == msg.sender, "only owner can set check in interval");
         vaults[vaultId].checkInInterval = newCheckInInterval;
         // Automatically check in
         vaults[vaultId].lastCheckIn = block.timestamp;
     }
 
     function checkIn(uint256 vaultId) public {
-        require(isOwner(vaultId), "only owner can check in");
+        require(vaultKeyTokenContract.ownerOf(vaultId) == msg.sender, "only owner can check in");
         vaults[vaultId].lastCheckIn = block.timestamp;
     }
 
@@ -61,16 +61,6 @@ contract VaultManager {
         require(vaultId < vaults.length);
         VaultInfo memory vault = vaults[vaultId];
         return vaultBeneficiaryTicketTokenContract.ownerOf(vaultId) == msg.sender && block.timestamp >= vault.lastCheckIn + vault.checkInInterval; // safemath should be used, but not a critical issue because these variables were set by the owner
-    }
-
-    // TODO: Remove these functions, they should be called through VaultKey
-
-    function isOwner(uint256 vaultId) public view returns (bool) {
-        return msg.sender == vaultKeyTokenContract.ownerOf(vaultId);
-    }
-
-    function ownerOf(uint256 vaultId) public view returns (address) {
-        return vaultKeyTokenContract.ownerOf(vaultId);
     }
 
     // TODO: Emit events
