@@ -2,7 +2,10 @@ pragma solidity 0.5.12;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract VaultBeneficiaryClaimTicket is ERC721 {
+/* Both the vault "key" contract and the vault "beneficiary claim
+ticket" contract are instantiated from this VaultAccessERC721 */ 
+
+contract VaultAccessERC721 is ERC721 {
 
     address public _parentContract;
 
@@ -22,6 +25,4 @@ contract VaultBeneficiaryClaimTicket is ERC721 {
     function transferAuthorized(address from, address to, uint256 tokenId) public onlyParentContract {
         _safeTransferFrom(from, to, tokenId, "");
     }
-
-    // TODO: Inherit an abstract contract alongside VaultKey to make it DRY
 }
