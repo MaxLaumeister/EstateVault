@@ -15,13 +15,13 @@ contract VaultKey is ERC721 {
         _parentContract = parentContract;
     }
 
-    function mint(address to, uint256 tokenId) public onlyParentContract {
-        _mint(to, tokenId);
+    function mintAuthorized(address to, uint256 tokenId) public onlyParentContract {
+        _safeMint(to, tokenId);
     }
 
-    function yank(address from, address to, uint256 tokenId) public onlyParentContract {
-        _transferFrom(from, to, tokenId);
+    function transferAuthorized(address from, address to, uint256 tokenId) public onlyParentContract {
+        _safeTransferFrom(from, to, tokenId, "");
     }
 
-    // TODO: Check owner in when they do anything including transfer
+    // TODO: Inherit an abstract contract alongside VaultKeyBeneficiaryClaimTicket
 }
