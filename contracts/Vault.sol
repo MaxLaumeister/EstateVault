@@ -3,16 +3,16 @@ pragma solidity 0.5.12;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
-import "./VaultKey.sol";
+import "./VaultAccessERC721.sol";
 
 contract Vault is ERC721Holder  {
 
-    VaultKey public _vaultKeyTokenContract;
+    VaultAccessERC721 public _vaultKeyTokenContract;
     uint256 public _vaultId;
 
     function () external payable {} // This contract acts like a wallet, holding ETH, ERC-20 and ERC-721
 
-    constructor (VaultKey vaultKeyTokenContract, uint256 vaultId) public {
+    constructor (VaultAccessERC721 vaultKeyTokenContract, uint256 vaultId) public {
         _vaultKeyTokenContract = vaultKeyTokenContract;
         _vaultId = vaultId;
     }
