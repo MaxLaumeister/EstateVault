@@ -1,7 +1,6 @@
 const VaultManager = artifacts.require("VaultManager");
 const Vault = artifacts.require("Vault");
-const VaultKey = artifacts.require("VaultKey");
-const VaultBeneficiaryClaimTicket = artifacts.require("VaultBeneficiaryClaimTicket");
+const VaultAccessERC721 = artifacts.require("VaultAccessERC721");
 const ERC20Mintable = artifacts.require("ERC20Mintable");
 const ERC721Mintable = artifacts.require("ERC721Mintable");
 const truffleAssert = require('truffle-assertions');
@@ -36,8 +35,8 @@ contract("VaultManager", async function(accounts) {
 
         it("is deployed", async function() {
             vaultManagerInstance = await VaultManager.deployed();
-            vaultKeyInstance = await VaultKey.at(await vaultManagerInstance.vaultKeyTokenContract());
-            vaultBeneficiaryClaimTicketInstance = await VaultBeneficiaryClaimTicket.at(await vaultManagerInstance.vaultBeneficiaryTicketTokenContract());
+            vaultKeyInstance = await VaultAccessERC721.at(await vaultManagerInstance.vaultKeyTokenContract());
+            vaultBeneficiaryClaimTicketInstance = await VaultAccessERC721.at(await vaultManagerInstance.vaultBeneficiaryTicketTokenContract());
         });
 
         it("can create " + NUM_CONTRACTS + " properly-owned vaults with sequential IDs", async function() {
