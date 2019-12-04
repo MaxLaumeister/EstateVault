@@ -4,8 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./Vault.sol";
-import "./VaultKey.sol";
-import "./VaultBeneficiaryClaimTicket.sol";
+import "./VaultAccessERC721.sol";
 
 contract VaultManager {
     
@@ -17,13 +16,13 @@ contract VaultManager {
 
     VaultInfo[] public vaults;
 
-    VaultKey public vaultKeyTokenContract;
-    VaultBeneficiaryClaimTicket public vaultBeneficiaryTicketTokenContract;
+    VaultAccessERC721 public vaultKeyTokenContract;
+    VaultAccessERC721 public vaultBeneficiaryTicketTokenContract;
 
     constructor() public {
         // Global setup
-        vaultKeyTokenContract = new VaultKey(address(this));
-        vaultBeneficiaryTicketTokenContract = new VaultBeneficiaryClaimTicket(address(this));
+        vaultKeyTokenContract = new VaultAccessERC721(address(this));
+        vaultBeneficiaryTicketTokenContract = new VaultAccessERC721(address(this));
     }
 
     function newVault() public {
