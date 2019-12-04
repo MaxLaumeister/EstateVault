@@ -15,9 +15,13 @@ contract VaultBeneficiaryClaimTicket is ERC721 {
         _parentContract = parentContract;
     }
 
-    function mint(address to, uint256 tokenId) public onlyParentContract {
-        _mint(to, tokenId);
+    function mintAuthorized(address to, uint256 tokenId) public onlyParentContract {
+        _safeMint(to, tokenId);
     }
 
-    // TODO: Check owner in every time they transfer the ticket
+    function transferAuthorized(address from, address to, uint256 tokenId) public onlyParentContract {
+        _safeTransferFrom(from, to, tokenId, "");
+    }
+
+    // TODO: Inherit an abstract contract alongside VaultKey to make it DRY
 }
