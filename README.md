@@ -21,10 +21,13 @@ Alice owns Ethereum assets (ETH, ERC-20, and ERC-721 tokens) that she would like
 
 * Truffle
 * Truffle-Assertions
+* Mythx plugin for Truffle
 * OpenZeppelin
 
 ## TODO
 
+* Emit events
+* Implement `IERC721Metadata` to give the user more info about the vault/ticket tokens.
 * Write an end-user function reference
 * Write a [web3-react](https://github.com/NoahZinsmeister/web3-react) frontend that makes these contracts easier for end-users to interact with
 
