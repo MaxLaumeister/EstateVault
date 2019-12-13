@@ -17,6 +17,10 @@ Alice owns Ethereum assets (ETH, ERC-20, and ERC-721 tokens) that she would like
 4. Every few months, Alice calls the `checkIn()` function, which resets the endowment date to `365 days` in the future. Certain other actions of Alice's will also cause an automatic check-in, such as if she sets a new check-in interval, or if she transfers the key or the claim ticket (but not if someone else transfers the claim ticket).
 5. Something bad happens to Alice, and she is unable to check in any more. After it has been `365 days` since her last check-in (or after a custom interval, if Alice had set one using `setCheckInInterval()`), the endowment date is reached, and Bob is able to claim ownership of the vault and withdraw the assets. To claim ownership, Bob calls the `claimVaultKeyAsBeneficiary()` function. This function first checks that Bob owns the **beneficiary claim ticket**, then yanks the key from Alice's dead account and gives it to Bob, and finally, returns the claim ticket back to the vault for future reuse. Now Bob has the key, and with it, full ownership of the vault.
 
+## Installing
+
+`npm install`
+
 ## Truffle Tests
 
 Run `truffle test` to verify some of the contracts' functionality:
