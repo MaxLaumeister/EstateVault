@@ -25,13 +25,18 @@ contract VaultManager {
         vaultBeneficiaryTicketTokenContract = new VaultAccessERC721(this);
     }
 
-    function newVault() public {
+    function vaultCount() public view returns (uint) {
+        return vaults.length;
+    }
+
+    function newVault() public returns (uint) {
         uint256 vaultId = vaults.length;
         // Create instance of the child contract, with this contract as the parent
         Vault userVaultContract = new Vault(vaultKeyTokenContract, vaultId);
         vaultKeyTokenContract.mintAuthorized(msg.sender, vaultId); // Create a key and send it to the user
         vaultBeneficiaryTicketTokenContract.mintAuthorized(address(userVaultContract), vaultId); // Create a beneficiary ticket and leave it inside the user's vault
         vaults.push(VaultInfo(userVaultContract, 365 days, block.timestamp + 365 days)); // Save info about the vault
+        return vaultId;
     }
 
     // If you have the beneficiary ticket, when it's time, use your ticket to yank the vault key away from its current owner.

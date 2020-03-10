@@ -41,9 +41,12 @@ contract("VaultManager", async function(accounts) {
 
         it("can create " + NUM_CONTRACTS + " properly-owned vaults with sequential IDs", async function() {
             for (let i = 0; i < NUM_CONTRACTS; i++) {
+                const vaultId = await vaultManagerInstance.vaultCount({ from: accounts[i] });
                 await vaultManagerInstance.newVault({ from: accounts[i] });
+                assert.equal(vaultId, i);
                 assert.equal(await vaultKeyInstance.ownerOf(i), accounts[i]);
             }
+            assert.equal(await vaultManagerInstance.vaultCount(), NUM_CONTRACTS);
         });
 
         it("has " + NUM_CONTRACTS + " new child contracts with the correct key token contract", async function() {
