@@ -35,7 +35,7 @@ contract VaultManager {
         Vault userVaultContract = new Vault(vaultKeyTokenContract, vaultId);
         vaultKeyTokenContract.mintAuthorized(msg.sender, vaultId); // Create a key and send it to the user
         vaultBeneficiaryTicketTokenContract.mintAuthorized(address(userVaultContract), vaultId); // Create a beneficiary ticket and leave it inside the user's vault
-        vaults.push(VaultInfo(userVaultContract, 365 days, block.timestamp + 365 days)); // Save info about the vault
+        vaults.push(VaultInfo(userVaultContract, 365 days, block.timestamp)); // Save info about the vault
         return vaultId;
     }
 

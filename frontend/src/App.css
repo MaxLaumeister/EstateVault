@@ -1,0 +1,16 @@
+.addressComponent {
+    display: inline-block;
+    padding: 5px;
+    background-color: #e3e3ea;
+    border-radius: 3px;
+}
+
+.blockies {
+    display: inline-block;
+    font-size: 0;
+    width: 32px;
+    height: 32px;
+}
+.blockies, .address {
+    vertical-align: middle;
+}

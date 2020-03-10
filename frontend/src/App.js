@@ -1,8 +1,85 @@
-import Blockies from './blockies.js';
+import Blockies from 'ethereum-blockies-base64';
 import React, { Component } from 'react';
 import Web3 from 'web3';
 import queryString from 'query-string'
 import './App.css';
+
+class Address extends Component {
+	render() {
+		return <span className="addressComponent"><img className="blockies" alt="" src={this.props.address ? Blockies(this.props.address) : ""} /> <span className="address">{this.props.address ? this.props.address.substring(0, 7) + "..." : ""}</span></span>;
+	}
+}
+
+class NewVaultButton extends Component {
+	
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+	
+	async clickHandler(e) {
+		this.setState({ working: true });
+
+		console.log(this);
+
+		const newVaultGas = await this.props.managerContractWeb3.methods.newVault().estimateGas({
+			from: this.props.account
+		});
+		const newvault = await this.props.managerContractWeb3.methods.newVault().send({
+			from: this.props.account,
+			gas: newVaultGas
+		});
+
+		const totalVaults = await this.props.managerContractWeb3.methods.vaultCount().call();
+
+		this.setState({ working: false });
+		this.setState({ vaultCreated: totalVaults - 1 });
+	}
+	
+	render() {
+		return <span><button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "New Vault" : "Creating New Vault..."}</button> {this.state.vaultCreated === undefined ? "" : "Vault " + this.state.vaultCreated + " Created"}</span>
+	}
+}
+
+class CheckInButton extends Component {
+	
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+	
+	async clickHandler(e) {
+		this.setState({ working: true });
+
+		console.log("checkin");
+
+		this.setState({ working: false });
+	}
+	
+	render() {
+		return <button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "Check In" : "Checking In..."}</button>
+	}
+}
+
+class ChangeIntervalButton extends Component {
+	
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+	
+	async clickHandler(e) {
+		this.setState({ working: true });
+
+		console.log("checkin");
+
+		this.setState({ working: false });
+	}
+	
+	render() {
+		return <button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "Change" : "Changing..."}</button>
+	}
+}
 
 class App extends Component {
 
@@ -723,6 +800,10 @@ class App extends Component {
 			vaultAccessABI: vaultAccessABI
 		});
 		this.loadBlockchainData();
+
+		setInterval(() => {
+			this.setState({currentDate: Date.now()});
+		}, 100);
 	}
 
 
@@ -745,6 +826,7 @@ class App extends Component {
 		
 		// Load vault data
 		const manager = new web3.eth.Contract(this.state.vaultManagerABI, this.state.vaultManagerAddress);
+		this.setState({ managerContractWeb3: manager });
 		//console.log(manager.methods);
 
 		const vaultKey721Address = await manager.methods.vaultKeyTokenContract().call();
@@ -753,13 +835,6 @@ class App extends Component {
 		const vaultTicket721Address = await manager.methods.vaultBeneficiaryTicketTokenContract().call();
 		this.setState({ vaultTicket721Address: vaultTicket721Address });
 
-		const newVaultGas = await manager.methods.newVault().estimateGas({
-			from: accounts[0]
-		});
-		const newvault = await manager.methods.newVault().send({
-			from: accounts[0],
-			gas: newVaultGas
-		});
 		//console.log(newvault);
 		//const newvault2 = await manager.methods.newVault();
 		//console.log(newvault2);
@@ -771,7 +846,7 @@ class App extends Component {
 		if (vaultid) {
 			this.setState({ vaultid: vaultid });
 			const vault = await manager.methods.vaults(vaultid).call();
-			console.log(vault);
+			//console.log(vault);
 			const vaultAddress = vault.vaultContract;
 			this.setState({ vaultAddress: vaultAddress });
 			const vaultKeyTokenContract = new web3.eth.Contract(this.state.vaultAccessABI, vaultKey721Address);
@@ -780,6 +855,9 @@ class App extends Component {
 			const ticketOwner = await vaultTicketTokenContract.methods.ownerOf(vaultid).call();
 			this.setState({ keyOwner: keyOwner });
 			this.setState({ ticketOwner: ticketOwner });
+			console.log(vault);
+			this.setState({ checkInInterval: parseInt(vault.checkInInterval, 10) });
+			this.setState({ lastCheckIn: parseInt(vault.lastCheckIn, 10) });
 		} else {
 			this.setState({ vaultid: null });
 		}
@@ -795,7 +873,8 @@ class App extends Component {
 	}
   
 	render() {
-		let id = (this.state.vaultid === null) ? "(no vault selected)" : "Vault " + this.state.vaultid;
+		let id = (this.state.vaultid === null) ? "(no vault selected)" : "Vault " + this.state.vaultid + " Details";
+
 		//const blocky = Blockies.create();
 		//console.log(blocky);
 		return (
@@ -805,25 +884,29 @@ class App extends Component {
 				<details>
 					<summary>Contract Details</summary>
 					<p>
-						Manager Contract: {this.state.vaultManagerAddress}
+						Manager Contract: <Address address={this.state.vaultManagerAddress} />
 					</p>
 					<p>
-						Vault Key ERC721 Contract: {this.state.vaultKey721Address}
+						Vault Key ERC721 Contract: <Address address={this.state.vaultKey721Address} />
 					</p>
 					<p>
-						Vault Ticket ERC721 Contract: {this.state.vaultTicket721Address}
+						Vault Ticket ERC721 Contract: <Address address={this.state.vaultTicket721Address} />
 					</p>
 					<p>
 						Total Vault Count: {this.state.totalVaults}
 					</p>
 				</details>
 				<hr />
-				<p>Your account: {this.state.account}</p>
+				<p>Your account: <Address address={this.state.account} /></p>
 				<p>Balance: {this.state.balance} ETH</p>
 				<h2>{id}</h2>
-				<p>Vault Address: {this.state.vaultAddress}</p>
-				<p>Vault Key Owner: {this.state.keyOwner}</p>
-				<p>Vault Beneficiary Ticket Owner: {this.state.ticketOwner}</p>
+				<p>Vault Address: <Address address={this.state.vaultAddress} /></p>
+				<p>Vault Key Owner: <Address address={this.state.keyOwner} /></p>
+				<p>Vault Beneficiary Ticket Owner: <Address address={this.state.ticketOwner} /></p>
+				<p>Last Check-in: {((this.state.currentDate / 1000 - this.state.lastCheckIn) / 60 / 60 / 24).toFixed(6)} days ago <CheckInButton /></p>
+				<p>Check-in Interval: {this.state.checkInInterval / 60 / 60 / 24} days <ChangeIntervalButton /></p>
+				<p>Beneficiary Can Claim In: {((this.state.lastCheckIn + this.state.checkInInterval - this.state.currentDate / 1000) / 60 / 60 / 24).toFixed(6)} days</p>
+				<NewVaultButton managerContractWeb3={this.state.managerContractWeb3} account={this.state.account}/>
 			</div>
 		);
 	}
