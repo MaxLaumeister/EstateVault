@@ -1,8 +1,16 @@
+.container {
+    padding: 15px;
+}
+
+.panel {
+    border-radius: 3px;
+    padding: 15px;
+}
+
 .addressComponent {
     display: inline-block;
-    padding: 5px;
     background-color: #e3e3ea;
-    border-radius: 3px;
+    padding: 5px;
 }
 
 .blockies {
@@ -11,6 +19,12 @@
     width: 32px;
     height: 32px;
 }
+
 .blockies, .address {
     vertical-align: middle;
+}
+
+.vault {
+    background-color: #e3e3ea;
+    margin: 15px 0;
 }

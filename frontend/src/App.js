@@ -6,7 +6,7 @@ import './App.css';
 
 class Address extends Component {
 	render() {
-		return <span className="addressComponent"><img className="blockies" alt="" src={this.props.address ? Blockies(this.props.address) : ""} /> <span className="address">{this.props.address ? this.props.address.substring(0, 7) + "..." : ""}</span></span>;
+		return <span className="panel addressComponent"><img className="blockies" alt="" src={this.props.address ? Blockies(this.props.address) : ""} /> <span className="address">{this.props.address ? this.props.address.substring(0, 7) + "..." : ""}</span></span>;
 	}
 }
 
@@ -78,6 +78,46 @@ class ChangeIntervalButton extends Component {
 	
 	render() {
 		return <button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "Change" : "Changing..."}</button>
+	}
+}
+
+class DepositButton extends Component {
+	
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+	
+	async clickHandler(e) {
+		this.setState({ working: true });
+
+		console.log("click");
+
+		this.setState({ working: false });
+	}
+	
+	render() {
+		return <button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "Deposit" : "Loading..."}</button>
+	}
+}
+
+class WithdrawButton extends Component {
+	
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+	
+	async clickHandler(e) {
+		this.setState({ working: true });
+
+		console.log("click");
+
+		this.setState({ working: false });
+	}
+	
+	render() {
+		return <button disabled={this.state.working ? "disabled" : ""} onClick={this.clickHandler.bind(this)}>{!this.state.working ? "Withdraw" : "Loading..."}</button>
 	}
 }
 
@@ -898,14 +938,19 @@ class App extends Component {
 				</details>
 				<hr />
 				<p>Your account: <Address address={this.state.account} /></p>
-				<p>Balance: {this.state.balance} ETH</p>
-				<h2>{id}</h2>
-				<p>Vault Address: <Address address={this.state.vaultAddress} /></p>
-				<p>Vault Key Owner: <Address address={this.state.keyOwner} /></p>
-				<p>Vault Beneficiary Ticket Owner: <Address address={this.state.ticketOwner} /></p>
-				<p>Last Check-in: {((this.state.currentDate / 1000 - this.state.lastCheckIn) / 60 / 60 / 24).toFixed(6)} days ago <CheckInButton /></p>
-				<p>Check-in Interval: {this.state.checkInInterval / 60 / 60 / 24} days <ChangeIntervalButton /></p>
-				<p>Beneficiary Can Claim In: {((this.state.lastCheckIn + this.state.checkInInterval - this.state.currentDate / 1000) / 60 / 60 / 24).toFixed(6)} days</p>
+				<p>Balance: {this.state.balance} ETH (testnet)</p>
+				<div class="vault panel">
+					<h2>{id}</h2>
+					<DepositButton /> <WithdrawButton />
+					<hr />
+					<p>Vault Address: <Address address={this.state.vaultAddress} /></p>
+					<p>Vault Key Owner: <Address address={this.state.keyOwner} /></p>
+					<p>Vault Beneficiary Ticket Owner: <Address address={this.state.ticketOwner} /></p>
+					<hr />
+					<p>Last Check-in: {((this.state.currentDate / 1000 - this.state.lastCheckIn) / 60 / 60 / 24).toFixed(6)} days ago <CheckInButton /></p>
+					<p>Check-in Interval: {this.state.checkInInterval / 60 / 60 / 24} days <ChangeIntervalButton /></p>
+					<p>Beneficiary Can Claim In: {Math.max(((this.state.lastCheckIn + this.state.checkInInterval - this.state.currentDate / 1000) / 60 / 60 / 24), 0).toFixed(6)} days</p>
+				</div>
 				<NewVaultButton managerContractWeb3={this.state.managerContractWeb3} account={this.state.account}/>
 			</div>
 		);
